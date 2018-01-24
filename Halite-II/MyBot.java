@@ -34,18 +34,14 @@ public class MyBot {
             if (cheese) {
             	Cheese.cheeseMode(gameMap, turn, moveList);
             } else {
-            	/** 
-            	 * Panic: When to give up and hide in corner.
-            	**/
+            	/* Panic: When to give up and hide in corner. */
             	boolean panic = false;
                 ArrayList<Ship> myShips = new ArrayList<Ship> (gameMap.getMyPlayer().getShips().values());
                 if (myShips.size()  < gameMap.getAllShips().size() / Constants.PANIC) {
                 	panic = true;
                 }
                 
-                /** 
-            	 * Defending: Identifying and sending ships to defend.
-            	**/
+                /* Defending: Identifying and sending ships to defend. */
                 for (final Ship ship : gameMap.getMyPlayer().getShips().values()) {
                 	if (ship.getDockingStatus() != Ship.DockingStatus.Undocked) {
                 		ArrayList<Ship> possibleEnemies = Helper.filterOutDockedShips(gameMap, Helper.getEnemiesNear(gameMap, ship, Constants.DEFENDING));
@@ -167,7 +163,7 @@ public class MyBot {
                                     }
                             	}
                 			} else if (!planet.isOwned() && planet.getDockingSpots() > planet.getCurrentGoing()) {
-                				/*
+                				/* Never finished
                 				if (turn < 10) {
                 					ArrayList<Planet> possiblePlanets = Helper.getPlanetsNear(gameMap, ship, distance + 20);
                     				for (Planet possPlanet : possiblePlanets) {
@@ -226,7 +222,7 @@ public class MyBot {
                 				if ((target).getIgnore() && distance > 5) {
             						continue;
             					}
-                				if (Helper.iAmOwner(gameMap, target)) { // If I own the ship
+                				if (Helper.iAmOwner(gameMap, target)) {
                 					continue;
                 				} else {
                 					ArrayList<Ship> enemyShips = Helper.getEnemiesNear(gameMap, target, Constants.GROUP);
@@ -284,11 +280,11 @@ public class MyBot {
                                                     break;
                                                 }
                             				} else {
-                            					boolean move = Combat.prick(gameMap, ship, moveList); //Possibly this is the issue
+                            					boolean move = Combat.prick(gameMap, ship, moveList);
         				                		if (move) {
         				                			break;
         				                		}
-        				                		move = Combat.fleeAndPanic(gameMap, ship, moveList); //Possibly this is the issue
+        				                		move = Combat.fleeAndPanic(gameMap, ship, moveList);
         				                		if (move) {
         				                			break;
         				                		}
@@ -374,11 +370,6 @@ public class MyBot {
                                                 }
         									}
         								}
-        								/*
-										if (distance < 20) {
-        									
-        								}
-        								 */
         								if (distance < 20) {
         									if (gameMap.getAllPlayers().size() == 4) {
         										boolean move = Combat.groupFlee(gameMap, reallyCloseAllies, (Ship) target, moveList);
