@@ -120,48 +120,6 @@ public class Navigation {
         return new ThrustMove(ship, angleDeg, thrust);
     }
     
-	public static ThrustMove navigateShipToRun(final GameMap gameMap, final Ship ship, final Ship target, final int maxThrust, final int message) {
-		final int maxCorrections = 360;
-		final boolean avoidObstacles = true;
-		final double angularStepRad = Math.PI / 180.0;
-		final int increment = Helper.determineIncrement(gameMap);
-
-		double angleRad = ship.orientTowardsInRad(target);
-		int thrust = maxThrust;
-
-		double newTargetDx = Math.cos(angleRad) * thrust;
-		double newTargetDy = Math.sin(angleRad) * thrust;
-		Position newTarget = new Position(ship.getXPos() + newTargetDx, ship.getYPos() + newTargetDy);
-		double newAngleRad = ship.orientTowardsInRad(newTarget);
-
-		int iteration = 0;
-		while (avoidObstacles && (!gameMap.objectsBetween(ship, newTarget).isEmpty() || Helper.positionIsOOM(gameMap, newTarget)
-				|| !Helper.filterOutDockedShips(gameMap, Helper.getEnemiesNear(gameMap, newTarget, 14)).isEmpty()) && iteration <= maxCorrections) {
-			
-			newTargetDx = Math.cos(angleRad + (angularStepRad * iteration)) * thrust;
-			newTargetDy = Math.sin(angleRad + (angularStepRad * iteration)) * thrust;
-			newTarget = new Position(ship.getXPos() + newTargetDx, ship.getYPos() + newTargetDy);
-			newAngleRad = ship.orientTowardsInRad(newTarget);
-
-			if (!gameMap.objectsBetween(ship, newTarget).isEmpty() || Helper.positionIsOOM(gameMap, newTarget)
-					|| !Helper.filterOutDockedShips(gameMap, Helper.getEnemiesNear(gameMap, newTarget, 14)).isEmpty()) {
-				
-				newTargetDx = Math.cos(angleRad - (angularStepRad * iteration)) * thrust;
-				newTargetDy = Math.sin(angleRad - (angularStepRad * iteration)) * thrust;
-				newTarget = new Position(ship.getXPos() + newTargetDx, ship.getYPos() + newTargetDy);
-				newAngleRad = ship.orientTowardsInRad(newTarget);
-			}
-			iteration = iteration + increment;
-		}
-		if (iteration >= maxCorrections) {
-			return null;
-		}
-
-		final int angleDeg = Util.new_angle_with_message(Util.angleRadToDegClipped(newAngleRad), message);
-		ship.setNewPos(newTarget);
-		return new ThrustMove(ship, angleDeg, thrust);
-	}
-    
 	public static ThrustMove navigateShipToAnnoy(final GameMap gameMap, final Ship ship, final Ship target, final int maxThrust, final int message) {
 		final int maxCorrections = 360;
 		final boolean avoidObstacles = true;
@@ -567,6 +525,49 @@ public class Navigation {
 			} else {
 				return null;
 			}
+		}
+
+		final int angleDeg = Util.new_angle_with_message(Util.angleRadToDegClipped(newAngleRad), message);
+		ship.setNewPos(newTarget);
+		return new ThrustMove(ship, angleDeg, thrust);
+	}
+	
+	/* UNUSED: Literally navigateShipToAnnoy but not using getClosestPointShip */
+	public static ThrustMove navigateShipToRun(final GameMap gameMap, final Ship ship, final Ship target, final int maxThrust, final int message) {
+		final int maxCorrections = 360;
+		final boolean avoidObstacles = true;
+		final double angularStepRad = Math.PI / 180.0;
+		final int increment = Helper.determineIncrement(gameMap);
+
+		double angleRad = ship.orientTowardsInRad(target);
+		int thrust = maxThrust;
+
+		double newTargetDx = Math.cos(angleRad) * thrust;
+		double newTargetDy = Math.sin(angleRad) * thrust;
+		Position newTarget = new Position(ship.getXPos() + newTargetDx, ship.getYPos() + newTargetDy);
+		double newAngleRad = ship.orientTowardsInRad(newTarget);
+
+		int iteration = 0;
+		while (avoidObstacles && (!gameMap.objectsBetween(ship, newTarget).isEmpty() || Helper.positionIsOOM(gameMap, newTarget)
+				|| !Helper.filterOutDockedShips(gameMap, Helper.getEnemiesNear(gameMap, newTarget, 14)).isEmpty()) && iteration <= maxCorrections) {
+			
+			newTargetDx = Math.cos(angleRad + (angularStepRad * iteration)) * thrust;
+			newTargetDy = Math.sin(angleRad + (angularStepRad * iteration)) * thrust;
+			newTarget = new Position(ship.getXPos() + newTargetDx, ship.getYPos() + newTargetDy);
+			newAngleRad = ship.orientTowardsInRad(newTarget);
+
+			if (!gameMap.objectsBetween(ship, newTarget).isEmpty() || Helper.positionIsOOM(gameMap, newTarget)
+					|| !Helper.filterOutDockedShips(gameMap, Helper.getEnemiesNear(gameMap, newTarget, 14)).isEmpty()) {
+				
+				newTargetDx = Math.cos(angleRad - (angularStepRad * iteration)) * thrust;
+				newTargetDy = Math.sin(angleRad - (angularStepRad * iteration)) * thrust;
+				newTarget = new Position(ship.getXPos() + newTargetDx, ship.getYPos() + newTargetDy);
+				newAngleRad = ship.orientTowardsInRad(newTarget);
+			}
+			iteration = iteration + increment;
+		}
+		if (iteration >= maxCorrections) {
+			return null;
 		}
 
 		final int angleDeg = Util.new_angle_with_message(Util.angleRadToDegClipped(newAngleRad), message);

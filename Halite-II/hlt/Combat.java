@@ -6,6 +6,7 @@ import java.util.Collections;
 public class Combat {
 	/* Combat: Group of methods that I called combat for some reason  */
 	
+	/* Flee: Runs to nearest docked ship while avoiding enemies. */
 	public static boolean flee(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
 		Ship evadeTo = Helper.getClosestAllyDocked(gameMap, ship);
 		if (evadeTo != null) {
@@ -19,6 +20,7 @@ public class Combat {
 		return false;
 	}
 
+	/* Flee and Panic: Runs to nearest docked ship while avoiding enemies. If not possible, PANIC! */
 	public static boolean fleeAndPanic(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
 		Ship evadeTo = Helper.getClosestAllyDocked(gameMap, ship);
 		if (evadeTo != null) {
@@ -32,19 +34,7 @@ public class Combat {
 		return panic(gameMap, ship, moveList);
 	}
 
-	public static boolean run(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
-		Ship evadeTo = Helper.getClosestAllyDocked(gameMap, ship);
-		if (evadeTo != null) {
-			ThrustMove newThrustMove = Navigation.navigateShipToRun(gameMap, ship, evadeTo, Constants.MAX_SPEED, 3);
-			if (newThrustMove != null) {
-				moveList.add(newThrustMove);
-				ship.setCompleted(true);
-				return true;
-			}
-		}
-		return panic(gameMap, ship, moveList);
-	}
-
+	/* Evil: Goes to nearest docked enemy and while avoiding undocked enemies. Note: Not really used */
 	public static boolean evil(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
 		Ship evadeTo = Helper.getClosestDockedEnemy(gameMap, ship);
 		if (evadeTo != null) {
@@ -57,7 +47,34 @@ public class Combat {
 		}
 		return panic(gameMap, ship, moveList);
 	}
-	
+
+	/* Prick: Different version of evil? */
+	public static boolean prick(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
+		Ship evadeTo = Helper.getClosestDockedEnemy(gameMap, ship);
+		if (evadeTo != null) {
+			ThrustMove newThrustMove = Navigation.navigateShipToAnnoy(gameMap, ship, evadeTo, Constants.MAX_SPEED, 7);
+			if (newThrustMove != null) {
+				moveList.add(newThrustMove);
+				ship.setCompleted(true);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/* Panic: When unable to flee without taking damage, go to farthest point away possible */
+	public static boolean panic(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
+		Ship evadeFrom = Helper.getClosestEnemy(gameMap, ship);
+		ThrustMove newThrustMove = Navigation.navigateShipToPanic(gameMap, ship, evadeFrom, Constants.MAX_SPEED, 9);
+		if (newThrustMove != null) {
+			moveList.add(newThrustMove);
+			ship.setCompleted(true);
+			return true;
+		}
+		return false;
+	}
+
+	/* Group Flee: Makes group of ships flee but in reverse order */
 	public static boolean groupFlee(GameMap gameMap, ArrayList<Ship> myShips, Ship ship, ArrayList<Move> moveList) {
 		ArrayList<Ship> myShipsSorted = Helper.sortShipsByDistanceFrom(myShips, ship);
 		Collections.reverse(myShipsSorted);
@@ -90,6 +107,7 @@ public class Combat {
 		return true;
 	}
 	
+	/* Group Fight: Generic fighting when my ships around me are larger than enemies */
 	public static boolean groupFight(GameMap gameMap, ArrayList<Ship> myShips, Ship ship, ArrayList<Move> moveList) {
 		ArrayList<Ship> myShipsSorted = Helper.sortShipsByDistanceFrom(myShips, ship);
 		for (Ship myShip : myShipsSorted) {
@@ -118,6 +136,7 @@ public class Combat {
 		return true;
 	}
 	
+	/* Group Fight 2: Generic fighting when my ships around me are going to dive for enemie's docked ships */
 	public static boolean groupFight2(GameMap gameMap, ArrayList<Ship> myShips, Ship ship, ArrayList<Move> moveList) {
 		ArrayList<Ship> myShipsSorted = Helper.sortShipsByDistanceFrom(myShips, ship);
 		for (Ship myShip : myShipsSorted) {
@@ -146,6 +165,7 @@ public class Combat {
 		return true;
 	}
 	
+	/* Group: Groups ships together by going to the avg pos */
 	public static boolean group(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
 		ArrayList<Ship> ships = Helper.filterOutDockedShips(gameMap, Helper.getMyShipsNear(gameMap, ship, 20));
 		ships.add(ship);
@@ -186,6 +206,7 @@ public class Combat {
 		return true;
 	}
 	
+	/* Singular Group: Moves ship to avg pos of new pos or current pos */
 	public static boolean singularGroup(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
 		ArrayList<Ship> ships = Helper.filterOutDockedShips(gameMap, Helper.getMyShipsNear(gameMap, ship, 20));
 		if (ships.size() > 0) {
@@ -198,57 +219,8 @@ public class Combat {
 		}
 		return true;
 	}
-
-	public static boolean goThru(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
-		Ship evadeTo = Helper.getClosestDockedEnemy(gameMap, ship);
-		if (evadeTo != null) {
-			ThrustMove newThrustMove = Navigation.navigateShipToAnnoy(gameMap, ship, evadeTo, Constants.MAX_SPEED, 6);
-			if (newThrustMove != null) {
-				moveList.add(newThrustMove);
-				ship.setCompleted(true);
-				return true;
-			}
-		}
-		return flee(gameMap, ship, moveList);
-	}
-
-	public static boolean prick(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
-		Ship evadeTo = Helper.getClosestDockedEnemy(gameMap, ship);
-		if (evadeTo != null) {
-			ThrustMove newThrustMove = Navigation.navigateShipToAnnoy(gameMap, ship, evadeTo, Constants.MAX_SPEED, 7);
-			if (newThrustMove != null) {
-				moveList.add(newThrustMove);
-				ship.setCompleted(true);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static boolean prickNear(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
-		Ship evadeTo = Helper.getClosestDockedEnemy(gameMap, ship);
-		if (evadeTo != null) {
-			ThrustMove newThrustMove = Navigation.navigateShipToAnnoy(gameMap, ship, evadeTo, Constants.MAX_SPEED, 8);
-			if (newThrustMove != null) {
-				moveList.add(newThrustMove);
-				ship.setCompleted(true);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static boolean panic(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
-		Ship evadeFrom = Helper.getClosestEnemy(gameMap, ship);
-		ThrustMove newThrustMove = Navigation.navigateShipToPanic(gameMap, ship, evadeFrom, Constants.MAX_SPEED, 9);
-		if (newThrustMove != null) {
-			moveList.add(newThrustMove);
-			ship.setCompleted(true);
-			return true;
-		}
-		return false;
-	}
 	
+	/* Hide: Hides in corner */
 	public static boolean hide(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
 		Position hide = new Position(gameMap.getWidth(), gameMap.getHeight());
 		Position corner2 = new Position(gameMap.getWidth(), 0);
@@ -268,6 +240,48 @@ public class Combat {
 			moveList.add(newThrustMove);
 			ship.setCompleted(true);
 			return true;
+		}
+		return false;
+	}
+	
+	/* Unused function: Runs to nearest ally? */
+	public static boolean run(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
+		Ship evadeTo = Helper.getClosestAllyDocked(gameMap, ship);
+		if (evadeTo != null) {
+			ThrustMove newThrustMove = Navigation.navigateShipToRun(gameMap, ship, evadeTo, Constants.MAX_SPEED, 3);
+			if (newThrustMove != null) {
+				moveList.add(newThrustMove);
+				ship.setCompleted(true);
+				return true;
+			}
+		}
+		return panic(gameMap, ship, moveList);
+	}
+	
+	/* Unused function: Goes to nearest enemy and goes through while attacking? */
+	public static boolean goThru(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
+		Ship evadeTo = Helper.getClosestDockedEnemy(gameMap, ship);
+		if (evadeTo != null) {
+			ThrustMove newThrustMove = Navigation.navigateShipToAnnoy(gameMap, ship, evadeTo, Constants.MAX_SPEED, 6);
+			if (newThrustMove != null) {
+				moveList.add(newThrustMove);
+				ship.setCompleted(true);
+				return true;
+			}
+		}
+		return flee(gameMap, ship, moveList);
+	}
+
+	/* Unused function: Same thing as prickNear */
+	public static boolean prickNear(GameMap gameMap, Ship ship, ArrayList<Move> moveList) {
+		Ship evadeTo = Helper.getClosestDockedEnemy(gameMap, ship);
+		if (evadeTo != null) {
+			ThrustMove newThrustMove = Navigation.navigateShipToAnnoy(gameMap, ship, evadeTo, Constants.MAX_SPEED, 8);
+			if (newThrustMove != null) {
+				moveList.add(newThrustMove);
+				ship.setCompleted(true);
+				return true;
+			}
 		}
 		return false;
 	}
