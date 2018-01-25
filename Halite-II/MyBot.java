@@ -24,7 +24,6 @@ public class MyBot {
         while (true) {
         	moveList.clear();
             gameMap.updateMap(Networking.readLineIntoMetadata());
-            
             turn++;
             
             if (turn > 40) {
@@ -44,16 +43,16 @@ public class MyBot {
                 /* Defending: Identifying and sending ships to defend. */
                 for (final Ship ship : gameMap.getMyPlayer().getShips().values()) {
                 	if (ship.getDockingStatus() != Ship.DockingStatus.Undocked) {
-                		ArrayList<Ship> possibleEnemies = Helper.filterOutDockedShips(gameMap, Helper.getEnemiesNear(gameMap, ship, Constants.DEFENDING));
-                		ArrayList<Ship> net = Helper.getMyShipsNear(gameMap, ship, Constants.DEFENDING + 15);
+                		ArrayList<Ship> possibleEnemies = Util.filterOutDockedShips(gameMap, Util.getEnemiesNear(gameMap, ship, Constants.DEFENDING));
+                		ArrayList<Ship> net = Util.getMyShipsNear(gameMap, ship, Constants.DEFENDING + 15);
                 		
                 		if (net.size() >= possibleEnemies.size()) {
                 			for (Ship enemy : possibleEnemies) {
                     			if (!enemy.getIgnore()) {
-                    				Ship savior = Helper.getClosestAllyNotDockedNotIgnored(gameMap, ship);
+                    				Ship savior = Util.getClosestAllyNotDockedNotIgnored(gameMap, ship);
                     				/*
                     				if (savior != null && ship.getDistanceTo(savior) > ship.getDistanceTo(enemy)) {
-                    					savior = Helper.getClosestAllyNotDockedNotIgnored(gameMap, ship);
+                    					savior = Util.getClosestAllyNotDockedNotIgnored(gameMap, ship);
                     				}
                     				*/
                     				if (savior != null) {
@@ -67,8 +66,8 @@ public class MyBot {
                     						continue;
                     					}
                     					*/
-                    					if (enemy.getDistanceTo(ship) < 8 && Helper.filterOutDockedShips(gameMap, Helper.getMyShipsNear(gameMap, savior, 10)).size() > Helper.getEnemiesNear(gameMap, savior, 10).size()) {
-                    						//Navigation.enemyFlee(gameMap, enemy, Helper.getClosestAllyNotDocked(gameMap, enemy)); // Prediction
+                    					if (enemy.getDistanceTo(ship) < 8 && Util.filterOutDockedShips(gameMap, Util.getMyShipsNear(gameMap, savior, 10)).size() > Util.getEnemiesNear(gameMap, savior, 10).size()) {
+                    						//Navigation.enemyFlee(gameMap, enemy, Util.getClosestAllyNotDocked(gameMap, enemy)); // Prediction
                     						ThrustMove newThrustMove = Navigation.navigateShipToShip(gameMap, savior, enemy, Constants.MAX_SPEED, 12); // Defending Attacking
                     						if (newThrustMove != null) {
                                                 moveList.add(newThrustMove);
@@ -77,7 +76,7 @@ public class MyBot {
                                                 enemy.setIgnore(true);
                                             }
                     					} else {
-                    						ThrustMove newThrustMove = Navigation.navigateShipToDefend(gameMap, savior, enemy, Helper.getClosestAllyDocked(gameMap, enemy), Constants.MAX_SPEED, 10); // Defending
+                    						ThrustMove newThrustMove = Navigation.navigateShipToDefend(gameMap, savior, enemy, Util.getClosestAllyDocked(gameMap, enemy), Constants.MAX_SPEED, 10); // Defending
                     						if (newThrustMove != null) {
                                                 moveList.add(newThrustMove);
                                                 savior.setIgnore(true);
@@ -103,21 +102,21 @@ public class MyBot {
 						continue;
 					}
                 	if (panic && gameMap.getAllPlayers().size() == 4) {
-                		if (ship.getDistanceTo(Helper.getClosestEnemyNotDocked(gameMap, ship)) < 20) {
-                			boolean move = Combat.panic(gameMap, ship, moveList);
+                		if (ship.getDistanceTo(Util.getClosestEnemyNotDocked(gameMap, ship)) < 20) {
+                			boolean move = PreparedMoves.panic(gameMap, ship, moveList);
                     		if (move) continue;
                 		} else {
-                			boolean move = Combat.hide(gameMap, ship, moveList);
+                			boolean move = PreparedMoves.hide(gameMap, ship, moveList);
                     		if (move) continue;
                 		}
                 	}
-                	// ArrayList<Ship> nearbyAlliesAroundMe = Helper.filterOutIgnoreShips(gameMap, Helper.getMyShipsNear(gameMap, ship, Constants.GROUP));
-                	ArrayList<Ship> nearbyAlliesAroundMe = Helper.getMyShipsNear(gameMap, ship, Constants.GROUP);
+                	// ArrayList<Ship> nearbyAlliesAroundMe = Util.filterOutIgnoreShips(gameMap, Util.getMyShipsNear(gameMap, ship, Constants.GROUP));
+                	ArrayList<Ship> nearbyAlliesAroundMe = Util.getMyShipsNear(gameMap, ship, Constants.GROUP);
 					nearbyAlliesAroundMe.add(ship);
-					ArrayList<Ship> reallyCloseAllies = Helper.getMyShipsNear(gameMap, ship, Constants.SQUAD);
-					// ArrayList<Ship> reallyCloseAllies = Helper.filterOutIgnoreShips(gameMap, Helper.getMyShipsNear(gameMap, ship, Constants.SQUAD));
+					ArrayList<Ship> reallyCloseAllies = Util.getMyShipsNear(gameMap, ship, Constants.SQUAD);
+					// ArrayList<Ship> reallyCloseAllies = Util.filterOutIgnoreShips(gameMap, Util.getMyShipsNear(gameMap, ship, Constants.SQUAD));
 					reallyCloseAllies.add(ship);
-					ArrayList<Ship> squad = Helper.filterOutDockedShips(gameMap, nearbyAlliesAroundMe);
+					ArrayList<Ship> squad = Util.filterOutDockedShips(gameMap, nearbyAlliesAroundMe);
 					
                 	Map<Double, Entity> nearbyEntities = gameMap.nearbyEntitiesByDistance(ship);
                 	for (double distance : nearbyEntities.keySet()) {
@@ -127,8 +126,8 @@ public class MyBot {
                 		if (targetEntity instanceof Planet) {
                 			Planet planet = (Planet) targetEntity;
                 			
-                			Ship closestEnemy = Helper.getClosestEnemyNotDocked(gameMap, ship);
-                			Ship closestAlly = Helper.getClosestAllyNotDocked(gameMap, ship);
+                			Ship closestEnemy = Util.getClosestEnemyNotDocked(gameMap, ship);
+                			Ship closestAlly = Util.getClosestAllyNotDocked(gameMap, ship);
                 			
                 			if (closestEnemy != null && closestAlly != null) {
                 				if (ship.getDistanceTo(closestEnemy) < ship.getDistanceTo(closestAlly) + 5 && ship.getDistanceTo(closestEnemy) < 30) {
@@ -137,15 +136,15 @@ public class MyBot {
                 			}
                 			
                 			/** Don't dock if defenseless **/
-                			ArrayList<Ship> enemyShips = Helper.filterOutDockedShips(gameMap, Helper.getEnemiesNear(gameMap, ship, 30));
-                			ArrayList<Ship> allyShips = Helper.filterOutIgnoreShips(gameMap, Helper.filterOutDockedShips(gameMap, Helper.getMyShipsNear(gameMap, ship, 15)));
+                			ArrayList<Ship> enemyShips = Util.filterOutDockedShips(gameMap, Util.getEnemiesNear(gameMap, ship, 30));
+                			ArrayList<Ship> allyShips = Util.filterOutIgnoreShips(gameMap, Util.filterOutDockedShips(gameMap, Util.getMyShipsNear(gameMap, ship, 15)));
                 			if (enemyShips.size() > 0) {
                 				if (enemyShips.size() > allyShips.size() - 1  && distance < planet.getRadius() + 20) {
                     				continue;
                     			}
                 			}
                 			
-                			if (Helper.iAmOwner(gameMap, planet)) { 
+                			if (Util.iAmOwner(gameMap, planet)) { 
 								if (planet.getDockingSpots() > planet.getDockedShips().size() + planet.getCurrentGoing()) {
                             		if (ship.canDock(planet)) {
                             			planet.addToCurrentGoing();
@@ -165,7 +164,7 @@ public class MyBot {
                 			} else if (!planet.isOwned() && planet.getDockingSpots() > planet.getCurrentGoing()) {
                 				/* Never finished
                 				if (turn < 10) {
-                					ArrayList<Planet> possiblePlanets = Helper.getPlanetsNear(gameMap, ship, distance + 20);
+                					ArrayList<Planet> possiblePlanets = Util.getPlanetsNear(gameMap, ship, distance + 20);
                     				for (Planet possPlanet : possiblePlanets) {
                     					if (possPlanet != planet && possPlanet.getDockingSpots() > planet.getDockingSpots()) {
                     						if (ship.canDock(possPlanet)) {
@@ -193,10 +192,10 @@ public class MyBot {
                 				if (turn < 10 && planet.getDockingSpots() < gameMap.getAllPlanets().get(0).getDockingSpots() && gameMap.getAllPlayers().size() == 2) {
             						continue;
             					}
-                				if (turn < 10 && planet.getDistanceTo(Helper.getClosestPlanet(gameMap, planet)) > 100 && distance > 35 && gameMap.getAllPlayers().size() == 2) {
+                				if (turn < 10 && planet.getDistanceTo(Util.getClosestPlanet(gameMap, planet)) > 100 && distance > 35 && gameMap.getAllPlayers().size() == 2) {
                 					continue;
                 				}
-                				if (turn < 10 && ship.getDistanceTo(Helper.getClosestEnemy(gameMap, ship)) < 60) {
+                				if (turn < 10 && ship.getDistanceTo(Util.getClosestEnemy(gameMap, ship)) < 60) {
                 					continue;
                 				}
                 				// ^ Code that determines what inital planets to go for
@@ -222,21 +221,21 @@ public class MyBot {
                 				if ((target).getIgnore() && distance > 5) {
             						continue;
             					}
-                				if (Helper.iAmOwner(gameMap, target)) {
+                				if (Util.iAmOwner(gameMap, target)) {
                 					continue;
                 				} else {
-                					ArrayList<Ship> enemyShips = Helper.getEnemiesNear(gameMap, target, Constants.GROUP);
+                					ArrayList<Ship> enemyShips = Util.getEnemiesNear(gameMap, target, Constants.GROUP);
         							enemyShips.add(target);
-        							ArrayList<Ship> reallyCloseEnemies = Helper.filterOutDockedShips(gameMap, Helper.getEnemiesNear(gameMap, target, Constants.SQUAD));
+        							ArrayList<Ship> reallyCloseEnemies = Util.filterOutDockedShips(gameMap, Util.getEnemiesNear(gameMap, target, Constants.SQUAD));
         							reallyCloseEnemies.add(target);
-        							ArrayList<Ship> notDockedEnemyShips = Helper.filterOutDockedShips(gameMap, enemyShips);
+        							ArrayList<Ship> notDockedEnemyShips = Util.filterOutDockedShips(gameMap, enemyShips);
         							
-        							Ship closDockEnemyTar = Helper.getClosestDockedEnemy(gameMap, target);
-        							Ship closDockAllyTar = Helper.getClosestAllyDocked(gameMap, target);
+        							Ship closDockEnemyTar = Util.getClosestDockedEnemy(gameMap, target);
+        							Ship closDockAllyTar = Util.getClosestAllyDocked(gameMap, target);
         							
         							if (closDockEnemyTar != null && closDockAllyTar != null && nearbyAlliesAroundMe.size() > enemyShips.size()) {
         								/** Detects if ship is a "distraction" **/
-        								if (target.getDistanceTo(closDockEnemyTar) > 20  && target.getDistanceTo(closDockAllyTar) > 20  && target.getDistanceTo(Helper.getClosestPlanet(gameMap, target)) > 20) {
+        								if (target.getDistanceTo(closDockEnemyTar) > 20  && target.getDistanceTo(closDockAllyTar) > 20  && target.getDistanceTo(Util.getClosestPlanet(gameMap, target)) > 20) {
                     						continue;
                     					}
                 					}
@@ -251,20 +250,20 @@ public class MyBot {
                                                     break;
                                                 }
                             				} else {
-                            					if (Helper.getClosestAllyDocked(gameMap, ship) != null) {
-                            						if (Helper.getClosestAllyDocked(gameMap, ship).getDistanceTo(ship) < 20) {
-                                						boolean move = Combat.flee(gameMap, ship, moveList); 
+                            					if (Util.getClosestAllyDocked(gameMap, ship) != null) {
+                            						if (Util.getClosestAllyDocked(gameMap, ship).getDistanceTo(ship) < 20) {
+                                						boolean move = PreparedMoves.flee(gameMap, ship, moveList); 
                 				                		if (move) {
                 				                			break;
                 				                		}
                                 					} else {
-                                						boolean move = Combat.evil(gameMap, ship, moveList);
+                                						boolean move = PreparedMoves.evil(gameMap, ship, moveList);
                 				                		if (move) {
                 				                			break;
                 				                		}
                                 					}
                             					} else {
-                            						boolean move = Combat.fleeAndPanic(gameMap, ship, moveList);
+                            						boolean move = PreparedMoves.fleeAndPanic(gameMap, ship, moveList);
             				                		if (move) {
             				                			break;
             				                		}
@@ -280,11 +279,11 @@ public class MyBot {
                                                     break;
                                                 }
                             				} else {
-                            					boolean move = Combat.prick(gameMap, ship, moveList);
+                            					boolean move = PreparedMoves.prick(gameMap, ship, moveList);
         				                		if (move) {
         				                			break;
         				                		}
-        				                		move = Combat.fleeAndPanic(gameMap, ship, moveList);
+        				                		move = PreparedMoves.fleeAndPanic(gameMap, ship, moveList);
         				                		if (move) {
         				                			break;
         				                		}
@@ -293,15 +292,15 @@ public class MyBot {
                         			}
                         			
                         			if (nearbyAlliesAroundMe.size() >= notDockedEnemyShips.size()) { 
-                        				if (reallyCloseAllies.size() < Helper.filterOutDockedShips(gameMap, reallyCloseEnemies).size() && distance < 20) {
-                        					ArrayList<Ship> group = Helper.filterOutDockedShips(gameMap, Helper.getMyShipsNear(gameMap, ship, 20));
+                        				if (reallyCloseAllies.size() < Util.filterOutDockedShips(gameMap, reallyCloseEnemies).size() && distance < 20) {
+                        					ArrayList<Ship> group = Util.filterOutDockedShips(gameMap, Util.getMyShipsNear(gameMap, ship, 20));
                         					if (group.size() > 1) {
-                        						Combat.group(gameMap, ship, moveList);
+                        						PreparedMoves.group(gameMap, ship, moveList);
                         						if (ship.getCompleted()) {
         				                			break;
         				                		}
                         					} else {
-                        						if (Helper.filterOutDockedShips(gameMap, notDockedEnemyShips).size() == 0) {
+                        						if (Util.filterOutDockedShips(gameMap, notDockedEnemyShips).size() == 0) {
                         							newThrustMove = Navigation.navigateShipToShip(gameMap, ship, target, Constants.MAX_SPEED, 58); // Attacking no defender
                                 					if (newThrustMove != null) {
                                 						moveList.add(newThrustMove);
@@ -309,23 +308,23 @@ public class MyBot {
                                                         break;
                                                     }
                         						}
-                        						boolean move = Combat.fleeAndPanic(gameMap, ship, moveList);
+                        						boolean move = PreparedMoves.fleeAndPanic(gameMap, ship, moveList);
         				                		if (move) {
         				                			break;
         				                		}
                         					}
                         				}
                         				
-                        				if (Helper.getClosestDockedEnemy(gameMap, ship) != null && squad.size() > Helper.getEnemiesNear(gameMap, ship, 20).size()) {
-                        					for (Ship enemyShip : Helper.getEnemiesNear(gameMap, ship, 60))
+                        				if (Util.getClosestDockedEnemy(gameMap, ship) != null && squad.size() > Util.getEnemiesNear(gameMap, ship, 20).size()) {
+                        					for (Ship enemyShip : Util.getEnemiesNear(gameMap, ship, 60))
                         					{
-                        						if (enemyShip.getDockingStatus() != Ship.DockingStatus.Undocked && squad.size() > 1.2 * Helper.getEnemiesNear(gameMap, enemyShip, 20).size())
+                        						if (enemyShip.getDockingStatus() != Ship.DockingStatus.Undocked && squad.size() > 1.2 * Util.getEnemiesNear(gameMap, enemyShip, 20).size())
                         						{
-                        							boolean move = Combat.groupFight(gameMap, reallyCloseAllies, enemyShip, moveList);
+                        							boolean move = PreparedMoves.groupFight(gameMap, reallyCloseAllies, enemyShip, moveList);
                             						if (ship.getCompleted()) {
             				                			break;
             				                		}
-                            						move = Combat.singularGroup(gameMap, ship, moveList); //Possibly this is the issue
+                            						move = PreparedMoves.singularGroup(gameMap, ship, moveList); //Possibly this is the issue
         				                			if (move) {
             				                			break;
             				                		}
@@ -336,11 +335,10 @@ public class MyBot {
     				                		}
                         				}
                         				if (squad.size() > notDockedEnemyShips.size() * 2) {
-                        					if (Helper.getClosestAllyNotDocked(gameMap, ship) != null) {
+                        					if (Util.getClosestAllyNotDocked(gameMap, ship) != null) {
                         						newThrustMove = Navigation.navigateShipToShipDirectly(gameMap, ship, target, Constants.MAX_SPEED, 52); // Possibly could be distraction
                             					if (newThrustMove != null) {
                                                     moveList.add(newThrustMove);
-                                                    ship.setShip(target);
                                                     ship.setCompleted(true);
                                                     (target).incrementCurrent();
                                                     if ((target).getCurrent() >= 2) {
@@ -350,19 +348,19 @@ public class MyBot {
                                                 }
                         					}
                         				}
-                        				boolean move = Combat.groupFight2(gameMap, Helper.filterOutDockedShips(gameMap, reallyCloseAllies), target, moveList);
+                        				boolean move = PreparedMoves.groupFight2(gameMap, Util.filterOutDockedShips(gameMap, reallyCloseAllies), target, moveList);
 				                		if (ship.getCompleted()) {
 				                			break;
 				                		} else {
-				                			move = Combat.singularGroup(gameMap, ship, moveList);
+				                			move = PreparedMoves.singularGroup(gameMap, ship, moveList);
 				                			if (move) {
     				                			break;
     				                		}
 				                		}
         							} else {
         								if (nearbyAlliesAroundMe.size() >= notDockedEnemyShips.size() && squad.size() <= notDockedEnemyShips.size()) {
-        									if (Helper.getClosestAllyDocked(gameMap, ship) != null) {
-        										newThrustMove = Navigation.navigateShipToShipDirectly(gameMap, ship, Helper.getClosestAllyDocked(gameMap, ship), Constants.MAX_SPEED, 56); // Meat shield support
+        									if (Util.getClosestAllyDocked(gameMap, ship) != null) {
+        										newThrustMove = Navigation.navigateShipToShipDirectly(gameMap, ship, Util.getClosestAllyDocked(gameMap, ship), Constants.MAX_SPEED, 56); // Meat shield support
                             					if (newThrustMove != null) {
                                                     moveList.add(newThrustMove);
                                                     ship.setCompleted(true);
@@ -372,25 +370,25 @@ public class MyBot {
         								}
         								if (distance < 20) {
         									if (gameMap.getAllPlayers().size() == 4) {
-        										boolean move = Combat.groupFlee(gameMap, reallyCloseAllies, (Ship) target, moveList);
+        										boolean move = PreparedMoves.groupFlee(gameMap, reallyCloseAllies, (Ship) target, moveList);
             									if (ship.getCompleted()) {
         				                			break;
         				                		} else {
-        				                			move = Combat.fleeAndPanic(gameMap, ship, moveList);
+        				                			move = PreparedMoves.fleeAndPanic(gameMap, ship, moveList);
             				                		if (move) {
             				                			break;
             				                		}
         				                		}
         									} else {
-        										boolean move = Combat.prick(gameMap, ship, moveList);
+        										boolean move = PreparedMoves.prick(gameMap, ship, moveList);
         				                		if (move) {
         				                			break;
         				                		} else {
-        				                			move = Combat.groupFlee(gameMap, reallyCloseAllies, target, moveList);
+        				                			move = PreparedMoves.groupFlee(gameMap, reallyCloseAllies, target, moveList);
                 									if (ship.getCompleted()) {
             				                			break;
             				                		} else {
-            				                			move = Combat.fleeAndPanic(gameMap, ship, moveList);
+            				                			move = PreparedMoves.fleeAndPanic(gameMap, ship, moveList);
                 				                		if (move) {
                 				                			break;
                 				                		}

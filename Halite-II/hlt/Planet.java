@@ -60,7 +60,6 @@ public class Planet extends Entity {
     
 	@Override
 	public String toString() {
-		return "Planet[" + super.toString() + ", remainingProduction=" + remainingProduction + ", currentProduction="
-				+ currentProduction + ", dockingSpots=" + dockingSpots + ", dockedShips=" + dockedShips + "]";
+		return "Planet[" + super.toString() + ", remainingProduction=" + remainingProduction + ", currentProduction=" + currentProduction + ", dockingSpots=" + dockingSpots + ", dockedShips=" + dockedShips + "]";
 	}
 }

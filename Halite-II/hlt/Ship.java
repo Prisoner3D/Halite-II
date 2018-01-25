@@ -8,38 +8,32 @@ public class Ship extends Entity {
     private final int dockedPlanet;
     private final int dockingProgress;
     private final int weaponCooldown;
-    private int thrust;
-    private int angle;
-    private Planet planet;
-    private Ship ship;
-    private int current;
-    private boolean ignore;
-    private boolean completed;
-    private Position newPosition;
-    private Position newPositionEnemy;
-    private Position groupingPos;
-
+    private int thrust; // Thrust of following turn
+    private int angle; // Angle of following turn
+    private Position newPosition; // New pos of following turn
+    private Position groupingPos; // Saved grouping pos
+    
+    private int current; // Current amount of ships going for it (only used for distraction enemies)
+    private boolean ignore; // Ignore ships during calculations
+    private boolean completed; // Ship has made a move
+    
 	public Ship(final int owner, final int id, final double xPos, final double yPos,
                 final int health, final DockingStatus dockingStatus, final int dockedPlanet,
                 final int dockingProgress, final int weaponCooldown) {
 
         super(owner, id, xPos, yPos, health, Constants.SHIP_RADIUS);
-
         this.dockingStatus = dockingStatus;
         this.dockedPlanet = dockedPlanet;
         this.dockingProgress = dockingProgress;
         this.weaponCooldown = weaponCooldown;
         this.thrust = 0;
         this.angle = 0;
-        this.planet = null;
-        this.ship = null;
+        this.newPosition = null;
+        this.groupingPos = null;
+        
         this.current = 0;
         this.ignore = false;
         this.completed = false;
-        this.newPosition = null;
-        this.newPositionEnemy = null;
-        this.groupingPos = null;
-
     }
 	
 	public boolean getCompleted() {
@@ -70,30 +64,7 @@ public class Ship extends Entity {
 		this.groupingPos = targetPos;
 	}
 	
-	public Position getNewEnemyPos() {
-		return newPositionEnemy;
-	}
-	
-	public void setNewEnemyPos(Position newPosition) {
-		this.newPositionEnemy = newPosition;
-	}
-	
-	public Ship getShip() {
-		return ship;
-	}
-	
-	public void setShip(Ship ship) {
-		this.ship = ship;
-	}
-	
-	public Planet getPlanet() {
-		return planet;
-	}
-	
-	public void setPlanet(Planet planet) {
-		this.planet = planet;
-	}
-	
+
 	public int getCurrent() {
 		return current;
 	}
@@ -145,12 +116,6 @@ public class Ship extends Entity {
 
     @Override
     public String toString() {
-        return "Ship[" +
-                super.toString() +
-                ", dockingStatus=" + dockingStatus +
-                ", dockedPlanet=" + dockedPlanet +
-                ", dockingProgress=" + dockingProgress +
-                ", weaponCooldown=" + weaponCooldown +
-                "]";
+        return "Ship[" + super.toString() + ", dockingStatus=" + dockingStatus + ", dockedPlanet=" + dockedPlanet + ", dockingProgress=" + dockingProgress + ", weaponCooldown=" + weaponCooldown + "]";
     }
 }
